@@ -103,6 +103,25 @@ app.put('/user/:id', (req, res) => {
     return true;
 })
 
+app.get('/product/:id', async (req, res) => {
+    let commentData;
+    console.log('asdaa', req.params)
+    const bbb = await CommentModel.find({"productId": req.params.id}).exec();
+   // const aaa = await ScoreModel.aggregate([{$match: {"productId": req.params.id}}, { $unwind: "$Comments" },
+    //    {$group: {_id: "$_id", average: {$avg: "$Comments.food"}}}]).exec();
+    /*const aaa = await ScoreModel.find({"productId": req.params.id}).exec();*/
+    const aaa = await ScoreModel.aggregate([
+        {$match: {"productId":  req.params.id}},
+        { $group: {
+                "_id": "$_id",
+                "foodAvg": {$avg: 'food'},  //$first accumulator
+                "priceAvg": {$avg: 'price'},  //$sum accumulator
+                "roomAvg": { $avg: "room" }  //$sum accumulator
+            }}
+    ]).exec();
+    console.log("asdas", aaa);
+    res.send({"comment": bbb,"score":aaa})
+});
 
 app.listen(process.env.servicePort, () => {
     console.log('aaaaaaaaa');
